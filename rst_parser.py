@@ -289,6 +289,32 @@ class RSTParser:
                 i += 1
                 continue
 
+            # Check for .. literalinclude:: filename
+            if stripped.startswith(".. literalinclude::"):
+                inc_match = re.match(r"^\.\.\s+literalinclude::\s*(.+)$", stripped)
+                if inc_match:
+                    rel_target = inc_match.group(1).strip().strip("/")
+                    # Candidate locations for the included file
+                    candidates = [
+                        file_path.parent / rel_target,
+                        file_path.parents[1] / rel_target,
+                        file_path.parents[2] / rel_target,
+                        file_path.parents[2] / "examples" / Path(rel_target).name,
+                        file_path.parents[1] / "examples" / Path(rel_target).name,
+                        file_path.parents[0] / "examples" / Path(rel_target).name,
+                    ]
+                    for cand in candidates:
+                        if cand.exists() and cand.is_file():
+                            try:
+                                inc_code = cand.read_text(encoding="utf-8", errors="ignore")
+                                code_blocks.append(f"# [{cand.name}]\n{inc_code}")
+                                current_content_lines.append(f"\n[Included Code: {cand.name}]\n{inc_code}\n")
+                                break
+                            except Exception:
+                                pass
+                i += 1
+                continue
+
             # Check for parameter table lines (e.g., ``param`` |type| description)
             if "``" in stripped and ("|int|" in stripped or "|float|" in stripped or "|str|" in stripped or "|list|" in stripped):
                 parameters_lines.append(clean_inline_rst(stripped))
