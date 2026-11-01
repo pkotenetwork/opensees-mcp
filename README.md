@@ -1,68 +1,77 @@
 # OpenSeesPy & OPSVIS Documentation MCP Server
 
-A lightweight, production-ready local Model Context Protocol (MCP) server for searching, browsing, and retrieving documentation for **OpenSeesPy** and **OPSVIS**.
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Built with Google Antigravity 2.0](https://img.shields.io/badge/Built%20with-Google%20Antigravity%202.0-4285F4.svg)](https://deepmind.google)
+[![Powered by Gemini](https://img.shields.io/badge/AI%20Pair%20Programmer-Gemini%20Flash-F4B400.svg)](https://ai.google.dev)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
 
-## Key Features
+A lightweight, production-ready, and completely offline Model Context Protocol (MCP) server providing intelligent documentation search and code retrieval for **OpenSeesPy** and **OPSVIS**.
 
-- **Local & Offline**: Zero external APIs, embeddings, or third-party cloud services.
-- **SQLite FTS5 + BM25 Ranking**: Fast, native full-text search with boosted weighting for API commands and function signatures.
-- **Section-Based Chunking**: Preserves parameters, technical descriptions, and Python code examples without fragmentation.
-- **Incremental Indexing**: Uses file timestamps (`mtime`) and content hashing to instantly track added, updated, or removed documentation files.
-- **Strict Token Efficiency**: Short, focused excerpts (~500–800 chars) by default; full sections and code blocks are only fetched on explicit request.
-- **Clean STDIO Transport**: Standard output is reserved strictly for MCP JSON-RPC protocol messages; all logs write to `stderr`.
+Designed specifically for structural engineers, researchers, and developers pair-programming with AI assistants such as **Google Antigravity 2.0**, **Gemini**, Claude, and Cursor.
 
 ---
 
-## Directory Structure
+## ⚡ Built With Google Antigravity 2.0 & Gemini
 
-```text
-opensees_mcp/
-├── config.py                 # Paths, search limits, and database configuration
-├── rst_parser.py             # RST parser, Sphinx directives, code block extractor
-├── db.py                     # SQLite FTS5 database schema and helpers
-├── indexer.py                # Incremental file indexer
-├── search.py                 # BM25 search engine and token-optimized snippet generator
-├── server.py                 # FastMCP STDIO server exposing MCP tools
-├── requirements.txt          # Python dependencies (mcp>=2.3.0)
-├── doc_index.db              # Pre-indexed SQLite database
-└── tests/                    # Automated unit and integration test suite
-    ├── test_rst_parser.py
-    ├── test_indexer.py
-    ├── test_search.py
-    └── test_server.py
+This project was architected, implemented, and verified entirely via pair programming using:
+- **Google Antigravity 2.0** (Next-Generation Agentic Coding Environment by Google DeepMind)
+- **Gemini** (Advanced Reasoning & Agentic Execution)
+
+---
+
+## 🎯 Key Features
+
+- **100% Local & Offline**: Zero external vector APIs, embedding costs, or cloud services.
+- **Dual-Layer Search Engine**:
+  - **SQLite FTS5 BM25 Ranking** with boosted weighting for API commands and parameters.
+  - **Fuzzy / Typo-Tolerant Fallback** utilizing trigram indexing and vocabulary distance matching (e.g. automatically resolves `elasitc` $\rightarrow$ `Elastic`).
+- **AST-Powered Code Intelligence**: Statically parses function signatures and docstrings directly from Python source code without loading heavy DLLs.
+- **Section-Aware Chunking**: Preserves structural parameters, equations, and executable Python examples without chunk fragmentation.
+- **Strict Token Efficiency**: Excerpts are capped at ~500–800 characters to prevent context window bloat during LLM pair programming.
+- **Clean STDIO Transport**: Fully compliant with the official MCP specification; `sys.stdout` is reserved strictly for JSON-RPC messages and logs route to `stderr`.
+
+---
+
+## 🛠️ Exposed MCP Tools
+
+| Tool | Description |
+| :--- | :--- |
+| `search_docs(query, repo, limit)` | Full-text BM25 search across OpenSeesPy and OPSVIS with relevance ranking. |
+| `get_doc_section(chunk_id)` | Fetches the complete section content, parameters, and full code examples. |
+| `get_command_help(command_name)` | Quick retrieval of command signatures, argument tables, and syntax. |
+| `list_doc_topics(repo)` | Lists top-level chapters, sections, and module hierarchies. |
+| `refresh_doc_index()` | Incrementally updates the database when documentation files change. |
+| `get_doc_sources()` | Displays indexing statistics across both repositories. |
+
+---
+
+## 🚀 Quick Start & Installation
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/pkotenetwork/opensees-mcp.git
+cd opensees-mcp
 ```
 
----
-
-## Exposed MCP Tools
-
-1. `search_docs(query: str, repo: Optional[str] = None, limit: int = 5)`
-   - Full-text search with BM25 ranking across OpenSeesPy and OPSVIS documentation.
-   - Returns concise excerpts with chunk IDs and match relevance.
-2. `get_doc_section(chunk_id: str)`
-   - Retrieves the full documentation content, parameters, and complete Python code blocks for a specific chunk.
-3. `get_command_help(command_name: str)`
-   - Quick lookup for command signatures, parameters, usage descriptions, and code examples (e.g., `model`, `node`, `plot_defo`).
-4. `list_doc_topics(repo: Optional[str] = None)`
-   - Lists all top-level documentation sections, chapters, and available modules.
-5. `refresh_doc_index()`
-   - Incrementally scans documentation directories and synchronizes SQLite FTS5 with disk changes.
-6. `get_doc_sources()`
-   - Displays indexed documentation statistics (document counts and chunk counts per repository).
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+*(The repository includes the pre-indexed `doc_index.db` covering 548 files and 1,293 chunks—ready to query immediately).*
 
 ---
 
-## Google Antigravity MCP Configuration
+## 🤖 Google Antigravity 2.0 Configuration
 
-To add this server to Antigravity, add the following configuration to your Antigravity MCP settings (`mcp_config.json` or Antigravity Settings > MCP Servers):
+Add the server to your Antigravity MCP configuration (`~/.gemini/antigravity/mcp_config.json` or `~/.gemini/config/mcp_config.json`):
 
 ```json
 {
   "mcpServers": {
     "opensees-docs": {
-      "command": "C:\\ProgramData\\anaconda3\\python.exe",
+      "command": "python",
       "args": [
-        "d:\\OneDrive-Personal\\OneDrive\\Data\\OpenseesPy\\opensees_mcp\\server.py"
+        "/path/to/opensees-mcp/server.py"
       ],
       "env": {
         "PYTHONIOENCODING": "utf-8",
@@ -72,23 +81,22 @@ To add this server to Antigravity, add the following configuration to your Antig
   }
 }
 ```
+*(On Windows, provide the full path to `python.exe` and escape backslashes, e.g. `C:\\ProgramData\\anaconda3\\python.exe` and `D:\\opensees-mcp\\server.py`).*
 
 ---
 
-## Manual Execution & Testing
+## 🧪 Testing
 
-### 1. Re-index Documentation
+Run the automated test suite (parser, incremental indexer, BM25 search, and MCP endpoints):
 ```bash
-C:\ProgramData\anaconda3\python.exe d:\OneDrive-Personal\OneDrive\Data\OpenseesPy\opensees_mcp\indexer.py
+python -m unittest discover -s tests
 ```
 
-### 2. Run Test Suite
-```bash
-C:\ProgramData\anaconda3\python.exe -m unittest discover -s d:\OneDrive-Personal\OneDrive\Data\OpenseesPy\opensees_mcp\tests
-```
+---
 
-### 3. Run MCP Server directly
-```bash
-C:\ProgramData\anaconda3\python.exe d:\OneDrive-Personal\OneDrive\Data\OpenseesPy\opensees_mcp\server.py
-```
+## 📄 License & Attribution
 
+- **License**: Released under the [GNU General Public License v3.0 (GPLv3)](./LICENSE).
+- **OpenSees & OpenSeesPy**: Open System for Earthquake Engineering Simulation (UC Berkeley / PEER).
+- **OPSVIS**: Pre-, post-processing and visualization Python module for OpenSeesPy by Seweryn Kokot (Opole University of Technology, Poland). Cite: *SoftwareX, 34, 102615 (2026)*.
+- **Author**: Prashant Kote ([@pkotenetwork](https://github.com/pkotenetwork))
